@@ -53,8 +53,30 @@ namespace Entrada
 
             waveIn.BufferMilliseconds = 250;
 
-            //
+            //Que hacer cuando hay mustras disponibles
+
+            waveIn.DataAvailable += WaveIn_DataAvailable;
 
         }
+
+        private void WaveIn_DataAvailable(object sender, WaveInEventArgs e)
+        {
+            byte[] buffer = e.Buffer;
+            int bytesGrabados = e.BytesRecorded;
+            float acumulador = 0.0f;
+
+            for (int i = 0; i < bytesGrabados; i += 2)
+            {
+                short muestra = (short)(buffer[i + 1] << 8 | buffer[i]);
+                float muestra32bits =
+                    (float)muestra / 32768.0f;
+                acumulador += Math.Abs(muestra32bits);
+
+            }
+
+            float promedio = acumulador /
+                (bytesGrabados / 2.0f);
+            sldMicrofono.Value = (double)promedio;
+         }
     }
 }
